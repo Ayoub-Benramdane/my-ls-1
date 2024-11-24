@@ -27,7 +27,7 @@ func ParseArgs(args []string) map[string]bool {
 			} else if arg == "help" {
 				Flags["Help"] = true
 			} else {
-				fmt.Printf("myls: unrecognized option -- '%v'\nTry 'myls --help' for more information\n", string(arg))
+				fmt.Printf("myls: unrecognized option '--%v'\nTry 'myls --help' for more information\n", string(arg))
 				os.Exit(0)
 			}
 		} else if strings.HasPrefix(arg, "-") {
@@ -44,7 +44,7 @@ func ParseArgs(args []string) map[string]bool {
 				} else if arg[i] == 'l' {
 					Flags["LongFormat"] = true
 				} else {
-					fmt.Printf("myls: unrecognized option -- '%v'\nTry 'myls --help' for more information\n", string(arg[i]))
+					fmt.Printf("myls: unrecognized option '--%v'\nTry 'myls --help' for more information\n", string(arg[i]))
 					os.Exit(0)
 				}
 			}
