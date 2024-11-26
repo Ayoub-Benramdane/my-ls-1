@@ -16,33 +16,34 @@ func main() {
 	if len(paths) == 0 {
 		paths = append(paths, ".")
 	}
-
-
-	// dirSlice, fileSlice := []LongFormatInfo{},[]LongFormatInfo{}
-
-	// for _, path := range paths {
-	// 	if path.IsDir() {
-	// 		dirSlice = append(dirSlice, item)
-	// 	} else {
-	// 		fileSlice = append(fileSlice, item)
-	// 	}
-	// }
-
-	// for _, item := range fileSlice {
-	// 	fmt.Printf("%v  ", item.FileName)
-	// }
-	// fmt.Println("\n")
-	// if len(dirSlice) != 0 {
-	// 	for _, item := range dirSlice {
-	// 		fmt.Printf("%v:\n", item.FileName)
-	// 		for _, item := range dirSlice {
-	// 			fmt.Printf("%v  ", item.FileName)
-	// 		}
-	// 	}
-	// 	fmt.Println()
-	// }
-
-	for _, path := range paths {
+	dirSlice, fileSlice := SplitPath(paths)
+	for _, path := range fileSlice {
 		myls.MyLs(path, flags)
 	}
+	if len(fileSlice) != 0 {
+		fmt.Println()
+		if len(dirSlice) != 0 {
+			fmt.Println()
+		}
+	}
+	for i, path := range dirSlice {
+		fmt.Printf("%v:\n", path)
+		myls.MyLs(path, flags)
+		fmt.Println()
+		if i != len(dirSlice)-1 {
+			fmt.Println()
+		}
+	}
+}
+
+func SplitPath(paths []string) ([]string, []string) {
+	dirSlice, fileSlice := []string{}, []string{}
+	for _, path := range paths {
+		if myls.Dir(path) {
+			dirSlice = append(dirSlice, path)
+		} else {
+			fileSlice = append(fileSlice, path)
+		}
+	}
+	return dirSlice, fileSlice
 }
