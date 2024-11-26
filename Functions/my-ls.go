@@ -59,23 +59,26 @@ func MyLs(path string, flags map[string]bool) {
 		element := LongFormatInfo{item.Mode(), NumberLinks, User, Group, size, item.ModTime(), item.Name()}
 		masterSlice = append(masterSlice, element)
 	}
-	SortAlphabetic(&masterSlice)
+	SortAlphabetic(masterSlice)
 	if flags["Time"] {
-		SortByTime(&masterSlice)
+		SortByTime(masterSlice)
 	}
 	if flags["Reverse"] {
-		ReverseSorting(&masterSlice)
+		ReverseSorting(masterSlice)
 	}
 	if flags["LongFormat"] {
 		fmt.Println("total", int(total))
 		for _, item := range masterSlice {
-			fmt.Printf("%v %3s %3s %3s %10s %3s %s\n",
+			if AddSingleQuotes(item.FileName) {
+				item.FileName = "'" + item.FileName + "'"
+			}
+			fmt.Printf("%v %3s %3s %3s %7s %3s %s\n",
 				item.Permissions,
 				item.NumberLinks,
 				item.User,
 				item.Group,
 				item.Size,
-				item.Time.Format("Jan 01 00:00"),
+				item.Time.Format("Jan 02 15:04"),
 				item.FileName,
 			)
 		}
@@ -123,7 +126,6 @@ func Displaying(masterSlice []LongFormatInfo) {
 			}
 			fmt.Printf("%v  ", item.FileName)
 		}
-		fmt.Println()
 	}
 }
 

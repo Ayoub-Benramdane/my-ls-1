@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-func ParseArgs(args []string) map[string]bool {
-	Flags := make(map[string]bool)
+func ParseArgs(args []string) (map[string]bool, []string) {
+	Flags, paths := make(map[string]bool), []string{}
 	Flags["LongFormat"] = false
 	Flags["Recursive"] = false
 	Flags["Reverse"] = false
@@ -48,9 +48,11 @@ func ParseArgs(args []string) map[string]bool {
 					os.Exit(0)
 				}
 			}
+		} else {
+			paths = append(paths, arg)
 		}
 	}
-	return Flags
+	return Flags, paths
 }
 
 func CheckPath(path string) []fs.FileInfo {

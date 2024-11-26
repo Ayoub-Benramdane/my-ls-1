@@ -1,0 +1,7 @@
+Functions
+go.mod
+jhh!@
+ls.txt
+main.go
+myls
+myls.txt
