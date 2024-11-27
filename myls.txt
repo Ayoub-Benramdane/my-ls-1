@@ -1,5 +1,0 @@
-go.mod  ls.txt  main.go  myls  myls.txt  
-
-Functions:
-Functions  'jhh!@'  'jhh!@':
-Functions  'jhh!@'  
