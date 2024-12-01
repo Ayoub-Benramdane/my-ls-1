@@ -75,10 +75,3 @@ func CheckPath(path string) []fs.FileInfo {
 	}
 	return List
 }
-
-func Dir(path string) bool {
-	if _, err := os.ReadDir(path); err != nil {
-		return false
-	}
-	return true
-}

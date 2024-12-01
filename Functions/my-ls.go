@@ -21,7 +21,7 @@ type LongFormatInfo struct {
 	FileName    string
 }
 
-func MyLs(path string, flags map[string]bool) {
+func MyLs(path string, flags map[string]bool) int {
 	list := CheckPath(path)
 	masterSlice := []LongFormatInfo{}
 	var User, Group, NumberLinks string
@@ -103,6 +103,7 @@ func MyLs(path string, flags map[string]bool) {
 			MyLs(path+item.Name(), flags)
 		}
 	}
+	return len(masterSlice)
 }
 
 func AddSingleQuotes(s string) bool {
