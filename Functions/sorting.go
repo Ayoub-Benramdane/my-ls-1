@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func SortAlphabetic(slice []LongFormatInfo) {
+func SortLs(slice []LongFormatInfo) {
 	sort.Slice(slice, func(i, j int) bool {
 		return strings.ToLower(getKey(slice[i].FileName)) < strings.ToLower(getKey(slice[j].FileName))
 	})

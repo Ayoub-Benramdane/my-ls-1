@@ -3,9 +3,7 @@ package functions
 import (
 	"fmt"
 	"io/fs"
-	"os"
 	"os/user"
-	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -16,29 +14,14 @@ type LongFormatInfo struct {
 	NumberLinks string
 	User        string
 	Group       string
-	Size        string
+	Size        int64
 	Time        time.Time
 	FileName    string
 }
 
-func MyLs(path string, flags map[string]bool) int {
-	list := CheckPath(path)
+func MasterSlice(list []fs.FileInfo, flags map[string]bool, total *int) []LongFormatInfo {
 	masterSlice := []LongFormatInfo{}
 	var User, Group, NumberLinks string
-	var total int
-	if flags["All"] {
-		currentDir, err := os.Stat(".")
-		if err != nil {
-			fmt.Printf("myls: cannot access '%v': %v\n", path, err)
-			os.Exit(0)
-		}
-		parentDir, err := os.Stat("..")
-		if err != nil {
-			fmt.Printf("myls: cannot access '%v': %v\n", path, err)
-			os.Exit(0)
-		}
-		list = append(list, currentDir, parentDir)
-	}
 	for _, item := range list {
 		if !flags["All"] && item.Name()[0] == '.' {
 			continue
@@ -46,7 +29,11 @@ func MyLs(path string, flags map[string]bool) int {
 		if stat, ok := item.Sys().(*syscall.Stat_t); ok {
 			User = fmt.Sprintf("%d", stat.Uid)
 			Group = fmt.Sprintf("%d", stat.Gid)
-			NumberLinks = fmt.Sprintf("%d", stat.Nlink)
+			if item.Name()[0] == '.' {
+				NumberLinks = fmt.Sprintf("%d", stat.Nlink-1)
+			} else {
+				NumberLinks = fmt.Sprintf("%d", stat.Nlink)
+			}
 		}
 		if user, err := user.LookupId(User); err == nil {
 			User = user.Username
@@ -54,12 +41,18 @@ func MyLs(path string, flags map[string]bool) int {
 		if group, err := user.LookupGroupId(Group); err == nil {
 			Group = group.Name
 		}
-		total += int(item.Size()) / 1020
-		size := strconv.Itoa(int(item.Size()))
-		element := LongFormatInfo{item.Mode(), NumberLinks, User, Group, size, item.ModTime(), item.Name()}
+		*total += int(item.Size()) / 1020
+		element := LongFormatInfo{item.Mode(), NumberLinks, User, Group, item.Size(), item.ModTime(), item.Name()}
 		masterSlice = append(masterSlice, element)
 	}
-	SortAlphabetic(masterSlice)
+	return masterSlice
+}
+
+func MyLs(path string, flags map[string]bool) int {
+	list := CheckPath(path, flags)
+	total := 0
+	masterSlice := MasterSlice(list, flags, &total)
+	SortLs(masterSlice)
 	if flags["Time"] {
 		SortByTime(masterSlice)
 	}
@@ -68,115 +61,32 @@ func MyLs(path string, flags map[string]bool) int {
 	}
 	if flags["LongFormat"] {
 		fmt.Println("total", int(total))
-		for _, item := range masterSlice {
-			if AddSingleQuotes(item.FileName) {
-				item.FileName = "'" + item.FileName + "'"
-			}
-			fmt.Printf("%v %3s %3s %3s %7s %3s %s\n",
-				item.Permissions,
-				item.NumberLinks,
-				item.User,
-				item.Group,
-				item.Size,
-				item.Time.Format("Jan 02 15:04"),
-				item.FileName,
-			)
-		}
+		LongFormat(masterSlice)
 	} else {
-		if AddSingleQuotes(path) {
-			path = "'" + path + "'"
-		}
+		path = AddSingleQuotes(path)
 		if flags["Recursive"] {
 			fmt.Printf("%v:\n", path)
 		}
-		Displaying(masterSlice)
+		ShortFormat(masterSlice)
+		if flags["Recursive"] && path != "." && len(masterSlice) != 0 && IsDir(list) {
+			fmt.Println()
+		}
 	}
 	for _, item := range list {
 		if flags["Recursive"] && item.IsDir() {
-			if !flags["All"] && strings.HasPrefix(item.Name(), ".") || item.Name() == "." || item.Name() == ".." {
-				continue
-			}
-			if !strings.HasSuffix(path, "/") {
-				path += "/"
-			}
 			fmt.Println()
-			MyLs(path+item.Name(), flags)
+			Recursive(item, path, flags)
 		}
 	}
 	return len(masterSlice)
 }
 
-func AddSingleQuotes(s string) bool {
-	for _, r := range s {
-		if r < 44 {
-			return true
-		}
+func Recursive(item fs.FileInfo, path string, flags map[string]bool) {
+	if !flags["All"] && strings.HasPrefix(item.Name(), ".") || item.Name() == "." || item.Name() == ".." {
+		return
 	}
-	return false
-}
-
-func Displaying(masterSlice []LongFormatInfo) {
-	if len(masterSlice) > 20 {
-		BigSlice(masterSlice)
-	} else if len(masterSlice) > 10 {
-		MeduimSlice(masterSlice)
-	} else {
-		for _, item := range masterSlice {
-			if AddSingleQuotes(item.FileName) {
-				item.FileName = "'" + item.FileName + "'"
-			}
-			fmt.Printf("%v  ", item.FileName)
-		}
+	if !strings.HasSuffix(path, "/") {
+		path += "/"
 	}
-}
-
-func BigSlice(masterSlice []LongFormatInfo) {
-	for i, item := range masterSlice {
-		if AddSingleQuotes(item.FileName) {
-			item.FileName = "'" + item.FileName + "'"
-		}
-		if i%3 == 0 {
-			fmt.Printf("%v  ", item.FileName)
-		}
-	}
-	fmt.Println()
-	for i, item := range masterSlice {
-		if AddSingleQuotes(item.FileName) {
-			item.FileName = "'" + item.FileName + "'"
-		}
-		if i%2 == 0 && i%3 != 0 {
-			fmt.Printf("%v  ", item.FileName)
-		}
-	}
-	fmt.Println()
-	for i, item := range masterSlice {
-		if AddSingleQuotes(item.FileName) {
-			item.FileName = "'" + item.FileName + "'"
-		}
-		if i%2 != 0 && i%3 != 0 {
-			fmt.Printf("%v  ", item.FileName)
-		}
-	}
-	fmt.Println()
-}
-
-func MeduimSlice(masterSlice []LongFormatInfo) {
-	for i, item := range masterSlice {
-		if AddSingleQuotes(item.FileName) {
-			item.FileName = "'" + item.FileName + "'"
-		}
-		if i%2 == 0 {
-			fmt.Printf("%v  ", item.FileName)
-		}
-	}
-	fmt.Println()
-	for i, item := range masterSlice {
-		if AddSingleQuotes(item.FileName) {
-			item.FileName = "'" + item.FileName + "'"
-		}
-		if i%2 != 0 {
-			fmt.Printf("%v  ", item.FileName)
-		}
-	}
-	fmt.Println()
+	MyLs(path+item.Name(), flags)
 }
