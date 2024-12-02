@@ -63,7 +63,8 @@ func MyLs(path string, flags map[string]bool) int {
 		fmt.Println("total", int(total))
 		LongFormat(masterSlice)
 	} else {
-		path = AddSingleQuotes(path)
+		var newSlice LongFormatInfo
+		path = AddSingleQuotes(path, newSlice.Permissions)
 		if flags["Recursive"] {
 			fmt.Printf("%v:\n", path)
 		}
