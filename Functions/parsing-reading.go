@@ -17,9 +17,9 @@ func ParseArgs(args []string) (map[string]bool, []string) {
 				case "reverse": Flags["Reverse"] = true
 				case "all": Flags["All"] = true
 				case "help": Flags["Help"] = true
-				default: fmt.Printf("myls: unrecognized option '--%v'\nTry 'myls --help' for more information\n", string(arg));os.Exit(0)
+				default: fmt.Printf("myls: unrecognized option '--%v'\nTry 'myls --help' for more information\n", string(arg)); os.Exit(0)
 			}
-		} else if strings.HasPrefix(arg, "-") {
+		} else if strings.HasPrefix(arg, "-") && len(arg) != 1 && arg[1] != '/' {
 			arg = strings.TrimPrefix(arg, "-")
 			for i := 0; i < len(arg); i++ {
 				switch arg[i] {
@@ -28,7 +28,7 @@ func ParseArgs(args []string) (map[string]bool, []string) {
 					case 'a': Flags["All"] = true
 					case 't': Flags["Time"] = true
 					case 'l': Flags["LongFormat"] = true
-					default: fmt.Printf("./myls: invalid option '--%v'\nTry './myls --help' for more information\n", string(arg[i]));os.Exit(0)
+					default: fmt.Printf("./myls: invalid option '--%v'\nTry './myls --help' for more information\n", string(arg[i])) ;os.Exit(0)
 				}
 			}
 		} else {

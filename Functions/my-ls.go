@@ -27,6 +27,11 @@ func MasterSlice(list []fs.FileInfo, flags map[string]bool, total *int) []LongFo
 			continue
 		}
 		if stat, ok := item.Sys().(*syscall.Stat_t); ok {
+			if flags["All"] {
+				*total += int(stat.Blocks)
+			} else if !strings.HasPrefix(item.Name(), ".") {
+				*total += int(stat.Blocks)
+			}
 			User = fmt.Sprintf("%d", stat.Uid)
 			Group = fmt.Sprintf("%d", stat.Gid)
 			if item.Name()[0] == '.' {
@@ -41,7 +46,6 @@ func MasterSlice(list []fs.FileInfo, flags map[string]bool, total *int) []LongFo
 		if group, err := user.LookupGroupId(Group); err == nil {
 			Group = group.Name
 		}
-		*total += int(item.Size()) / 1020
 		element := LongFormatInfo{item.Mode(), NumberLinks, User, Group, item.Size(), item.ModTime(), item.Name()}
 		masterSlice = append(masterSlice, element)
 	}
@@ -60,10 +64,11 @@ func MyLs(path string, flags map[string]bool) int {
 		ReverseSorting(masterSlice)
 	}
 	if flags["LongFormat"] {
-		fmt.Println("total", int(total))
+		fmt.Println("total", total/2)
 		LongFormat(masterSlice)
 	} else {
-		path = AddSingleQuotes(path)
+		var newSlice LongFormatInfo
+		path = AddSingleQuotes(path, newSlice.Permissions)
 		if flags["Recursive"] {
 			fmt.Printf("%v:\n", path)
 		}
@@ -88,5 +93,8 @@ func Recursive(item fs.FileInfo, path string, flags map[string]bool) {
 	if !strings.HasSuffix(path, "/") {
 		path += "/"
 	}
-	MyLs(path+item.Name(), flags)
+	if item.IsDir() {
+		Path(append([]string{path+item.Name()}))
+		// MyLs(path+item.Name(), flags)
+	}
 }
