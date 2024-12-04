@@ -27,7 +27,7 @@ func IsDir(list []fs.FileInfo) bool {
 	return false
 }
 
-func DirSlice(fileSlice, dirSlice []string, flags map[string]bool) {
+func DirSlice(fileSlice, dirSlice []string, flags *map[string]bool) {
 	if len(fileSlice) != 0 && len(dirSlice) != 0 {
 		fmt.Println()
 	}
@@ -35,17 +35,14 @@ func DirSlice(fileSlice, dirSlice []string, flags map[string]bool) {
 		if len(dirSlice) != 1 {
 			fmt.Printf("%v:\n", path)
 		}
-		Len := MyLs(path, flags)
-		if Len != 0 {
-			fmt.Println()
-		}
+		MyLs(path, flags)
 		if i != len(dirSlice)-1 {
 			fmt.Println()
 		}
 	}
 }
 
-func FileSlice(fileSlice, dirSlice []string, flags map[string]bool) {
+func FileSlice(fileSlice, dirSlice []string, flags *map[string]bool) {
 	for _, path := range fileSlice {
 		MyLs(path, flags)
 	}

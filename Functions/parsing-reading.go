@@ -7,27 +7,27 @@ import (
 	"strings"
 )
 
-func ParseArgs(args []string) (map[string]bool, []string) {
-	Flags, paths := make(map[string]bool), []string{}
+func ParseArgs(args []string, Flags *map[string]bool) ([]string) {
+	paths := []string{}
 	for _, arg := range args {
 		if strings.HasPrefix(arg, "--") {
 			arg = strings.TrimPrefix(arg, "--")
 			switch arg {
-				case "recursive": Flags["Recursive"] = true
-				case "reverse": Flags["Reverse"] = true
-				case "all": Flags["All"] = true
-				case "help": Flags["Help"] = true
+				case "recursive": (*Flags)["Recursive"] = true
+				case "reverse": (*Flags)["Reverse"] = true
+				case "all": (*Flags)["All"] = true
+				case "help": (*Flags)["Help"] = true
 				default: fmt.Printf("myls: unrecognized option '--%v'\nTry 'myls --help' for more information\n", string(arg)); os.Exit(0)
 			}
 		} else if strings.HasPrefix(arg, "-") && len(arg) != 1 && arg[1] != '/' {
 			arg = strings.TrimPrefix(arg, "-")
 			for i := 0; i < len(arg); i++ {
 				switch arg[i] {
-					case 'R': Flags["Recursive"] = true
-					case 'r': Flags["Reverse"] = true
-					case 'a': Flags["All"] = true
-					case 't': Flags["Time"] = true
-					case 'l': Flags["LongFormat"] = true
+					case 'R': (*Flags)["Recursive"] = true
+					case 'r': (*Flags)["Reverse"] = true
+					case 'a': (*Flags)["All"] = true
+					case 't': (*Flags)["Time"] = true
+					case 'l': (*Flags)["LongFormat"] = true
 					default: fmt.Printf("./myls: invalid option '--%v'\nTry './myls --help' for more information\n", string(arg[i])) ;os.Exit(0)
 				}
 			}
@@ -35,7 +35,7 @@ func ParseArgs(args []string) (map[string]bool, []string) {
 			paths = append(paths, arg)
 		}
 	}
-	return Flags, paths
+	return paths
 }
 
 func CheckPath(path string, flags map[string]bool) []fs.FileInfo {
