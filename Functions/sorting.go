@@ -1,14 +1,28 @@
 package functions
 
 import (
-	"sort"
 	"strings"
 )
 
+func SortPath(slice []string) []string {
+	for i := 0; i < len(slice)-1; i++ {
+		for j := i+1; j < len(slice); j++ {
+			if strings.ToLower(slice[i]) > strings.ToLower(slice[j]) {
+				slice[i], slice[j] = slice[j], slice[i]
+			}
+		}
+	}
+	return slice
+}
+
 func SortLs(slice []LongFormatInfo) {
-	sort.Slice(slice, func(i, j int) bool {
-		return strings.ToLower(getKey(slice[i].FileName)) < strings.ToLower(getKey(slice[j].FileName))
-	})
+	for i := 0; i < len(slice); i++ {
+		for j := i+1; j < len(slice); j++ {
+			if strings.ToLower(getKey(slice[i].FileName)) > strings.ToLower(getKey(slice[j].FileName)) {
+				slice[i], slice[j] = slice[j], slice[i]
+			}
+		}
+	}
 }
 
 func getKey(filename string) string {

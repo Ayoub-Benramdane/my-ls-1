@@ -2,7 +2,6 @@ package functions
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 )
 
@@ -18,16 +17,13 @@ func SplitPath(paths []string) ([]string, []string) {
 	return dirSlice, fileSlice
 }
 
-func IsDir(list []fs.FileInfo) bool {
-	for _, item := range list {
-		if item.IsDir() {
-			return true
-		}
+func FileSlice(fileSlice, dirSlice []string, flags map[string]bool) {
+	for _, path := range fileSlice {
+		MyLs(path, flags, 0)
 	}
-	return false
 }
 
-func DirSlice(fileSlice, dirSlice []string, flags *map[string]bool) {
+func DirSlice(fileSlice, dirSlice []string, flags map[string]bool, totalPath int) {
 	if len(fileSlice) != 0 && len(dirSlice) != 0 {
 		fmt.Println()
 	}
@@ -35,18 +31,9 @@ func DirSlice(fileSlice, dirSlice []string, flags *map[string]bool) {
 		if len(dirSlice) != 1 {
 			fmt.Printf("%v:\n", path)
 		}
-		MyLs(path, flags)
+		MyLs(path, flags, totalPath)
 		if i != len(dirSlice)-1 {
 			fmt.Println()
 		}
-	}
-}
-
-func FileSlice(fileSlice, dirSlice []string, flags *map[string]bool) {
-	for _, path := range fileSlice {
-		MyLs(path, flags)
-	}
-	if len(fileSlice) != 0 {
-		fmt.Println()
 	}
 }

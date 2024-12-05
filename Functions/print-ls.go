@@ -3,6 +3,7 @@ package functions
 import (
 	"fmt"
 	"io/fs"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -11,10 +12,10 @@ func AddSingleQuotes(name string) string {
 	runes := []rune{' ', '*', '?', '(', ')', '$', '\\', '\'', '&', '|', '<', '>', '~'}
 	for _, r := range runes {
 		if strings.ContainsRune(name, r) {
-			return "'"  + name  + "'"
+			return "'" + name + "'"
 		}
 	}
-	return  name
+	return name
 }
 
 func Color(name string, permission fs.FileMode) string {
@@ -26,23 +27,25 @@ func Color(name string, permission fs.FileMode) string {
 	} else if fmt.Sprintf("%s", permission)[0] == '-' {
 		return green + name + reset
 	}
-	return  yellow + name + reset
+	return yellow + name + reset
 }
 
 func LongFormat(slice []LongFormatInfo) {
-	for i, item := range slice {
+	for _, item := range slice {
 		item.FileName = AddSingleQuotes(item.FileName)
-		fmt.Printf("%v %"+strconv.Itoa(len(item.NumberLinks))+"s %s %s %7d %s %s",
+		fmt.Printf("%v %"+strconv.Itoa(len(item.NumberLinks))+"s %s %s %7d %s ",
 			item.Permissions,
 			item.NumberLinks,
 			item.User,
 			item.Group,
 			item.Size,
 			item.Time.Format("Jan 2 15:04"),
-			Color(item.FileName, item.Permissions),
 		)
-		if i != len(slice)-1 {
-			fmt.Println()
+		target, err := os.Readlink(item.FileName)
+		if err != nil {
+			fmt.Printf("%s\n", Color(item.FileName, item.Permissions))
+		} else {
+			fmt.Printf("\033[36m%s\033[0m -> %s\n", item.FileName, target)
 		}
 	}
 }
@@ -50,6 +53,11 @@ func LongFormat(slice []LongFormatInfo) {
 func ShortFormat(masterSlice []LongFormatInfo) {
 	for _, item := range masterSlice {
 		item.FileName = AddSingleQuotes(item.FileName)
-		fmt.Printf("%v ", Color(item.FileName, item.Permissions))
+		_, err := os.Readlink(item.FileName)
+		if err != nil {
+			fmt.Printf("%v  ", Color(item.FileName, item.Permissions))
+		} else {
+			fmt.Printf("\033[31;40m%s\033[0m  ", item.FileName)
+		}
 	}
 }
