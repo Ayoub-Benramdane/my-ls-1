@@ -19,7 +19,10 @@ func SplitPath(paths []string) ([]string, []string) {
 
 func FileSlice(fileSlice, dirSlice []string, flags map[string]bool) {
 	for _, path := range fileSlice {
-		MyLs(path, flags, 0)
+		MyLs(path, flags, -1)
+	}
+	if len(fileSlice) != 0 {
+		fmt.Println()
 	}
 }
 
@@ -28,9 +31,6 @@ func DirSlice(fileSlice, dirSlice []string, flags map[string]bool, totalPath int
 		fmt.Println()
 	}
 	for i, path := range dirSlice {
-		if len(dirSlice) != 1 {
-			fmt.Printf("%v:\n", path)
-		}
 		MyLs(path, flags, totalPath)
 		if i != len(dirSlice)-1 {
 			fmt.Println()

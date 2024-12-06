@@ -38,9 +38,9 @@ func getKey(filename string) string {
 
 func SortByTime(slice []LongFormatInfo) {
 	for i := 0; i < len(slice); i++ {
-		for j := 0; j < len(slice)-i-1; j++ {
-			if !slice[j].Time.After(slice[j+1].Time) {
-				slice[j], slice[j+1] = slice[j+1], slice[j]
+		for j := i+1; j < len(slice); j++ {
+			if !slice[i].Time.After(slice[j].Time) {
+				slice[i], slice[j] = slice[j], slice[i]
 			}
 		}
 	}

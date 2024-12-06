@@ -50,7 +50,7 @@ func LongFormat(slice []LongFormatInfo) {
 	}
 }
 
-func ShortFormat(masterSlice []LongFormatInfo) {
+func ShortFormat(masterSlice []LongFormatInfo, file int) {
 	for _, item := range masterSlice {
 		item.FileName = AddSingleQuotes(item.FileName)
 		_, err := os.Readlink(item.FileName)
@@ -59,5 +59,8 @@ func ShortFormat(masterSlice []LongFormatInfo) {
 		} else {
 			fmt.Printf("\033[31;40m%s\033[0m  ", item.FileName)
 		}
+	}
+	if len(masterSlice) != 0 && file != -1 {
+		fmt.Println()
 	}
 }
